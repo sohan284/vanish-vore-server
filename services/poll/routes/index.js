@@ -6,7 +6,7 @@ const cors = require("cors");
 // Add CORS configuration
 router.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3002",
+    origin: process.env.FRONTEND_URL || "https://vanishvote-project.vercel.app",
     credentials: true,
   })
 );
