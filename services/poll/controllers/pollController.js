@@ -4,11 +4,14 @@ const { v4: uuidv4 } = require("uuid");
 const pollController = {
   createPoll: async (req, res) => {
     try {
+      console.log("Received request body:", req.body);
+
       const { question, pollType, options, expiresIn, hideResults, isPrivate } =
         req.body;
 
       // Validate inputs
       if (!question || !pollType || !expiresIn) {
+        console.log("Missing fields:", { question, pollType, expiresIn });
         return res.status(400).json({
           success: false,
           message: "Missing required fields",
@@ -46,13 +49,19 @@ const pollController = {
       });
 
       const savedPoll = await poll.save();
+      console.log("Poll saved successfully:", savedPoll);
 
       res.status(201).json({
         success: true,
         message: "Poll created successfully",
         data: {
+          _id: savedPoll._id,
           pollId: savedPoll.pollId,
+          question: savedPoll.question,
+          pollType: savedPoll.pollType,
           expiresAt: savedPoll.expiresAt,
+          hideResults: savedPoll.hideResults,
+          isPrivate: savedPoll.isPrivate,
         },
       });
     } catch (error) {
