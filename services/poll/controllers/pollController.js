@@ -87,7 +87,7 @@ const pollController = {
       }
 
       // Check if poll has expired but not marked as expired
-      if (poll.expiresAt < new Date() && !poll.isExpired) {
+      if (poll.expiresAt <= new Date()) {
         await poll.markExpired();
       }
 
@@ -150,7 +150,8 @@ const pollController = {
         });
       }
 
-      if (poll.expiresAt < new Date()) {
+      const currentTime = new Date();
+      if (poll.expiresAt <= currentTime) {
         return res.status(400).json({
           success: false,
           message: "Poll has expired and voting is closed",
@@ -258,7 +259,8 @@ const pollController = {
         });
       }
 
-      if (poll.expiresAt < new Date()) {
+      const currentTime = new Date();
+      if (poll.expiresAt <= currentTime) {
         return res.status(400).json({
           success: false,
           message: "Poll has expired and commenting is closed",
@@ -289,16 +291,13 @@ const pollController = {
   getPublicPolls: async (req, res) => {
     try {
       // Get active public polls sorted by most recent
-      const polls = await Poll.find({
-        isPrivate: false,
-        expiresAt: { $gt: new Date() },
-      })
-        .sort({ createdAt: -1 })
-        .limit(10);
+      const currentTime = new Date();
+      const polls = await Poll.find({}).sort({ createdAt: -1 }).limit(10);
 
       // Format response to include only necessary info
       const formattedPolls = polls.map((poll) => ({
         _id: poll._id,
+        pollId: poll.pollId,
         question: poll.question,
         pollType: poll.pollType,
         expiresAt: poll.expiresAt,
