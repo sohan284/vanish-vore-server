@@ -105,18 +105,13 @@ const pollController = {
           hasExpired: poll.expiresAt < new Date(),
           reactions: poll.reactions,
           comments: poll.comments,
+          options: poll.options.map((option) => ({
+            _id: option._id,
+            text: option.text,
+            votes: option.votes || 0,
+          })),
         },
       };
-
-      // Only show vote counts if poll doesn't hide results or has expired
-      if (!poll.hideResults || poll.expiresAt < new Date()) {
-        response.data.options = poll.options;
-      } else {
-        response.data.options = poll.options.map((option) => ({
-          _id: option._id,
-          text: option.text,
-        }));
-      }
 
       res.status(200).json(response);
     } catch (error) {
