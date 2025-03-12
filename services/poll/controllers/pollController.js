@@ -21,7 +21,10 @@ const pollController = {
       // Format options based on poll type
       let formattedOptions = [];
       if (pollType === "yes-no") {
-        formattedOptions = [{ text: "Yes" }, { text: "No" }];
+        formattedOptions = [
+          { text: "Yes", votes: 0 },
+          { text: "No", votes: 0 },
+        ];
       } else if (pollType === "multiple-choice") {
         if (!Array.isArray(options) || options.length < 2) {
           return res.status(400).json({
@@ -29,7 +32,17 @@ const pollController = {
             message: "Multiple choice polls require at least 2 options",
           });
         }
-        formattedOptions = options.map((option) => ({ text: option }));
+        // Check if options are already formatted
+        formattedOptions = options.map((option) => {
+          if (typeof option === "string") {
+            return { text: option, votes: 0 };
+          }
+          // If option is already formatted, use it as is
+          if (option.text) {
+            return { text: option.text, votes: option.votes || 0 };
+          }
+          return { text: String(option), votes: 0 };
+        });
       } else {
         return res.status(400).json({
           success: false,
@@ -39,11 +52,11 @@ const pollController = {
 
       // Create poll with expiration
       const poll = new Poll({
-        pollId: uuidv4(), // Generate a guaranteed unique UUID
+        pollId: uuidv4(),
         question,
         pollType,
         options: formattedOptions,
-        expiresAt: new Date(Date.now() + expiresIn * 60 * 60 * 1000), // Convert hours to milliseconds
+        expiresAt: new Date(Date.now() + expiresIn * 60 * 60 * 1000),
         hideResults: hideResults || false,
         isPrivate: isPrivate || false,
       });
